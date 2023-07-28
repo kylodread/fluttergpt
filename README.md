@@ -61,4 +61,4 @@ signingConfigs {
          keyPassword "123456"
      }
 }
-```
+```# fluttergpt
