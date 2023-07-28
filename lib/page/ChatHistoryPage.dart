@@ -1,5 +1,7 @@
+// ignore_for_file: file_names, library_private_types_in_public_api, use_build_context_synchronously
+
+import 'package:aichat/components/MyLimit.dart';
 import 'package:aichat/page/ChatPage.dart';
-import 'package:aichat/page/SettingPage.dart';
 import 'package:aichat/utils/Config.dart';
 import 'package:aichat/utils/Time.dart';
 import 'package:aichat/utils/Utils.dart';
@@ -50,10 +52,10 @@ class _ChatHistoryPageState extends State<ChatHistoryPage> {
               onTap: () {
                 Navigator.pop(context);
               },
-              child: SizedBox(
+              child: const SizedBox(
                 height: 60,
                 child: Row(
-                  children: const [
+                  children: [
                     SizedBox(width: 24),
                     Image(
                       width: 18,
@@ -78,8 +80,9 @@ class _ChatHistoryPageState extends State<ChatHistoryPage> {
         ),
         backgroundColor: Colors.white,
         elevation: 0.5,
-        actions: const [
-          SizedBox(width: 8),
+        actions: [
+          if (Config.isAdShow() && store.apiCount < Config.appUserAdCount) const MyLimit(),
+          const SizedBox(width: 8),
         ],
       ),
       body: SafeArea(

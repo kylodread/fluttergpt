@@ -1,3 +1,6 @@
+// ignore_for_file: file_names, library_private_types_in_public_api, avoid_print
+
+import 'package:aichat/components/MyLimit.dart';
 import 'package:aichat/components/QuestionInput.dart';
 import 'package:aichat/utils/Chatgpt.dart';
 import 'package:aichat/utils/Config.dart';
@@ -6,6 +9,8 @@ import 'package:flutter/services.dart';
 import 'package:aichat/stores/AIChatStore.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:provider/provider.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:aichat/utils/AdCommon.dart';
 import 'package:lottie/lottie.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_tts/flutter_tts.dart';
@@ -40,9 +45,61 @@ class _ChatPageState extends State<ChatPage> {
 
   bool _isCopying = false;
 
+  BannerAd? _bannerAd;
+  bool _bannerAdLoaded = false;
+  double _adWidth = 0;
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    _adWidth = MediaQuery.of(context).size.width;
+
+    // _loadAd(); // Leave out for the time being
+  }
+
+  void _loadAd() async {
+    if (!Config.isAdShow()) {
+      return;
+    }
+    final AnchoredAdaptiveBannerAdSize? size = await AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(
+      _adWidth.truncate(),
+    );
+
+    if (size == null) {
+      print('Unable to get height of anchored banner.');
+      return;
+    }
+
+    _bannerAd = BannerAd(
+      adUnitId: homeBannerAd,
+      size: size,
+      request: const AdRequest(),
+      listener: BannerAdListener(
+        onAdLoaded: (Ad ad) {
+          print('BannerAd loaded: $homeBannerAd');
+          _bannerAdLoaded = true;
+          setState(() {});
+        },
+        onAdFailedToLoad: (Ad ad, LoadAdError error) {
+          print('BannerAd load fail: $error');
+          ad.dispose();
+        },
+      ),
+    );
+
+    _bannerAd!.load();
+  }
+
+  Widget _renderBannerAdWidget() {
+    if (_bannerAd != null && _bannerAdLoaded) {
+      return SizedBox(
+        width: _bannerAd!.size.width.toDouble(),
+        height: _bannerAd!.size.height.toDouble(),
+        child: AdWidget(ad: _bannerAd!),
+      );
+    } else {
+      return Container();
+    }
   }
 
   Future<void> initTts() async {
@@ -159,7 +216,7 @@ class _ChatPageState extends State<ChatPage> {
               onTap: () {
                 Navigator.pop(context);
               },
-              child: Row(
+              child: const Row(
                 children: [
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
@@ -167,7 +224,7 @@ class _ChatPageState extends State<ChatPage> {
                       SizedBox(
                         height: 60,
                         child: Row(
-                          children: const [
+                          children: [
                             SizedBox(width: 24),
                             Image(
                               width: 18,
@@ -175,7 +232,7 @@ class _ChatPageState extends State<ChatPage> {
                             ),
                             SizedBox(width: 12),
                             Text(
-                              "ChatGPT",
+                              "ChatAI בעברית",
                               style: TextStyle(
                                 color: Color.fromRGBO(0, 0, 0, 1),
                                 fontSize: 18,
@@ -196,8 +253,9 @@ class _ChatPageState extends State<ChatPage> {
         ),
         backgroundColor: Colors.white,
         elevation: 0.5,
-        actions: const [
-          SizedBox(width: 20),
+        actions: [
+          if (Config.isAdShow() && store.apiCount < Config.appUserAdCount) const MyLimit(),
+          const SizedBox(width: 20),
         ],
       ),
       body: SafeArea(
@@ -208,6 +266,7 @@ class _ChatPageState extends State<ChatPage> {
                 chat['messages'],
               ),
             ),
+            _renderBannerAdWidget(),
             QuestionInput(
               key: globalQuestionInputKey,
               chat: chat,
@@ -288,7 +347,7 @@ class _ChatPageState extends State<ChatPage> {
             ),
             const SizedBox(height: 12),
             const Text(
-              'Tip',
+              'עֵצָה',
               style: TextStyle(
                 color: Colors.black,
                 fontSize: 14,
@@ -355,14 +414,12 @@ class _ChatPageState extends State<ChatPage> {
 
   Widget _renderMessageItem(Map message, int index) {
     String role = message['role'];
-    String defaultAvatar = 'images/logo.png';
-    String defaultRoleName = 'ChatGPT';
+    String defaultAvatar = 'images/logo2.png';
+    String defaultRoleName = 'ChatAi';
     Color defaultColor = const Color.fromRGBO(229, 245, 244, 1);
     Color defaultTextColor = Colors.black;
     String defaultTextPrefix = '';
     List<Widget> defaultIcons = [
-      _renderVoiceWidget(message),
-      const SizedBox(width: 6),
       _renderShareWidget(message),
       const SizedBox(width: 8),
       _renderCopyWidget(message),
@@ -371,7 +428,7 @@ class _ChatPageState extends State<ChatPage> {
 
     if (role == 'user') {
       defaultAvatar = 'images/user_icon.png';
-      defaultRoleName = 'You';
+      defaultRoleName = 'Yאת';
       defaultColor = const Color.fromRGBO(236, 236, 236, 1.0);
       defaultIcons = [];
     } else if (role == 'error') {
@@ -447,7 +504,7 @@ class _ChatPageState extends State<ChatPage> {
                 data: '$defaultTextPrefix${message['content']}',
                 // data: 'This is a line\nThis is another line'.replaceAll('\n', '<br>'),
                 shrinkWrap: true,
-                selectable: true,
+                selectable: false,
                 styleSheet: MarkdownStyleSheet(
                   textScaleFactor: 1.1,
                   textAlign: WrapAlignment.start,
@@ -477,21 +534,6 @@ class _ChatPageState extends State<ChatPage> {
     );
   }
 
-  Widget _renderVoiceWidget(Map message) {
-    return GestureDetector(
-      onTap: () async {
-        _speak(message['content']);
-      },
-      child: Container(
-        padding: const EdgeInsets.fromLTRB(2, 2, 2, 2),
-        child: const Image(
-          image: AssetImage('images/voice_icon.png'),
-          width: 26,
-        ),
-      ),
-    );
-  }
-
   Widget _renderCopyWidget(Map message) {
     return GestureDetector(
       onTap: () async {
@@ -505,7 +547,7 @@ class _ChatPageState extends State<ChatPage> {
           ),
         );
         EasyLoading.showToast(
-          'Copy successfully!',
+          'הועתק בהצלחה!',
           dismissOnTap: true,
         );
         _isCopying = false;

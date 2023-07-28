@@ -1,14 +1,18 @@
-import 'package:aichat/stores/AIChatStore.dart';
+// ignore_for_file: file_names, library_private_types_in_public_api
+
+import 'dart:async';
+
 import 'package:aichat/utils/Chatgpt.dart';
 import 'package:aichat/utils/Config.dart';
 import 'package:aichat/utils/Utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
-import 'package:provider/provider.dart';
 import 'package:rating_dialog/rating_dialog.dart';
 import 'package:sp_util/sp_util.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:aichat/stores/AIChatStore.dart';
+import 'package:provider/provider.dart';
 
 class SettingPage extends StatefulWidget {
   const SettingPage({Key? key}) : super(key: key);
@@ -19,8 +23,7 @@ class SettingPage extends StatefulWidget {
 
 class _SettingPageState extends State<SettingPage> with WidgetsBindingObserver {
   bool isCopying = false;
-  final TextEditingController _keyTextEditingController = TextEditingController();
-  final TextEditingController _urlTextEditingController = TextEditingController();
+  final TextEditingController _textEditingController = TextEditingController();
 
   @override
   void initState() {
@@ -48,6 +51,8 @@ class _SettingPageState extends State<SettingPage> with WidgetsBindingObserver {
     }
   }
 
+  Timer? longPressTimer;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -66,10 +71,10 @@ class _SettingPageState extends State<SettingPage> with WidgetsBindingObserver {
               onTap: () {
                 Navigator.pop(context);
               },
-              child: SizedBox(
+              child: const SizedBox(
                 height: 60,
                 child: Row(
-                  children: const [
+                  children: [
                     SizedBox(width: 24),
                     Image(
                       width: 18,
@@ -77,7 +82,7 @@ class _SettingPageState extends State<SettingPage> with WidgetsBindingObserver {
                     ),
                     SizedBox(width: 12),
                     Text(
-                      "Setting",
+                      "הגדרות",
                       style: TextStyle(
                         color: Color.fromRGBO(0, 0, 0, 1),
                         fontSize: 18,
@@ -90,8 +95,32 @@ class _SettingPageState extends State<SettingPage> with WidgetsBindingObserver {
                 ),
               ),
             ),
-          ],
-        ),
+            // Logo in the top-right corner
+             Expanded(
+              child: Align(
+                alignment: Alignment.topRight,
+                child: Padding(
+                  padding: const EdgeInsets.only(right: 35),
+                  child: GestureDetector(
+                   onLongPressStart: (details) {
+                      longPressTimer = Timer(Duration(seconds: 1), () {
+                        _showPopupWindow();
+                      });
+                    },
+                    onLongPressEnd: (details) {
+                      longPressTimer?.cancel();
+                    },
+                  child: const Image(
+                    width: 40,
+                    image: AssetImage('images/logo2.png'), // Replace with your logo image path
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+        
         backgroundColor: Colors.white,
         elevation: 0.5,
       ),
@@ -107,70 +136,18 @@ class _SettingPageState extends State<SettingPage> with WidgetsBindingObserver {
                     'images/privacy_policy_icon.png',
                     Colors.red,
                     32,
-                    'Privacy Policy',
+                    'מדיניות הפרטיות',
                     () {
-                      final Uri url = Uri.parse('https://wewehao.github.io/Privacy/privacy.html');
-                      Utils.launchURL(url);
-                    },
-                  ),
-                  // renderItemWidget('images/share_icon.png', Colors.green, 26, 'Share App', () {
-                  //   Share.share(
-                  //     Platform.isAndroid
-                  //         ? 'https://play.google.com/store/apps/details?id=com.wewehao.aichat'
-                  //         : "https://apps.apple.com/app/id***",
-                  //   );
-                  // },),
-                  renderItemWidget(
-                    'images/star_icon.png',
-                    Colors.amber,
-                    26,
-                    'Rating App',
-                    () {
-                      showDialog(
-                        context: context,
-                        barrierDismissible: true,
-                        builder: (context) => RatingDialog(
-                          initialRating: 5.0,
-                          title: const Text(
-                            'Did you like the app?',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w400,
-                            ),
-                          ),
-                          message: const Text(
-                            'Tap a star to set your rating. Add more description here if you want.',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Color.fromRGBO(0, 0, 0, 0.5),
-                            ),
-                          ),
-                          image: ClipRRect(
-                            borderRadius: BorderRadius.circular(50.0),
-                            clipBehavior: Clip.antiAlias,
-                            child: const Image(
-                              width: 52,
-                              height: 52,
-                              image: AssetImage('images/logo.png'),
-                            ),
-                          ),
-                          submitButtonText: 'Submit',
-                          commentHint: 'Set your custom comment hint',
-                          onCancelled: () => print('cancelled'),
-                          onSubmitted: (response) {
-                            print('rating: ${response.rating}, comment: ${response.comment}');
-                          },
-                        ),
-                      );
+                      const url = 'https://gdigits.com/privacy-policy/';
+                      _copyToClipboardAndShowToast(url);
+                      Utils.launchURL(Uri.parse(url));
                     },
                   ),
                   renderItemWidget(
                     'images/email_icon.png',
                     Colors.purpleAccent,
                     26,
-                    'Feedback',
+                    'מָשׁוֹב',
                     () {
                       String recipientEmail = Config.contactEmail;
                       String subject = "${Config.appName} - feedback";
@@ -182,7 +159,7 @@ class _SettingPageState extends State<SettingPage> with WidgetsBindingObserver {
                         onLaunchFail: () {
                           Clipboard.setData(ClipboardData(text: recipientEmail));
                           EasyLoading.showToast(
-                            'Email address has been copied',
+                            'כתובת האימייל הועתקה',
                             dismissOnTap: true,
                           );
                         },
@@ -193,22 +170,11 @@ class _SettingPageState extends State<SettingPage> with WidgetsBindingObserver {
                     'images/key_icon.png',
                     Colors.lightGreen,
                     26,
-                    'Customize OpenAI Key',
+                    'התאם אישית את מפתח OpenAI',
                     () async {
-                      String cacheKey = ChatGPT.getCacheOpenAIKey();
-                      _keyTextEditingController.text = cacheKey;
+                      String cacheKey = await ChatGPT.getCacheOpenAIKey();
+                      _textEditingController.text = cacheKey;
                       _showCustomOpenAIKeyDialog();
-                    },
-                  ),
-                  renderItemWidget(
-                    'images/url_icon.png',
-                    Colors.deepPurpleAccent,
-                    26,
-                    'Customize OpenAI Base URL',
-                    () async {
-                      String cacheUrl = ChatGPT.getCacheOpenAIBaseUrl();
-                      _urlTextEditingController.text = cacheUrl;
-                      _showCustomOpenAIUrlDialog();
                     },
                   ),
 
@@ -218,13 +184,13 @@ class _SettingPageState extends State<SettingPage> with WidgetsBindingObserver {
                       'images/debug_icon.png',
                       Colors.indigo,
                       22,
-                      'Debug: Clear Storage',
+                      'איתור באגים: נקה אחסון',
                       () {
                         ChatGPT.storage.erase();
                         final store = Provider.of<AIChatStore>(context, listen: false);
                         store.syncStorage();
                         SpUtil.clear();
-                        EasyLoading.showToast('Clear Storage Success!');
+                        EasyLoading.showToast('ברור הצלחה באחסון!');
                       },
                     ),
                 ],
@@ -309,6 +275,34 @@ class _SettingPageState extends State<SettingPage> with WidgetsBindingObserver {
     );
   }
 
+  void _showPopupWindow() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('You found an Easter Egg'),
+          content: const Text('CodeNameKylo was here!   http://codenamekylo.co.za'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text('Close'),
+              ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _copyToClipboardAndShowToast(String url) {
+    Clipboard.setData(ClipboardData(text: url));
+    EasyLoading.showToast(
+      'מדיניות הפרטיות הועתקה. אנא הדבק את הקישור בדפדפן',
+      dismissOnTap: true,
+    );
+  }
+
   @override
   void dispose() {
     super.dispose();
@@ -320,14 +314,14 @@ class _SettingPageState extends State<SettingPage> with WidgetsBindingObserver {
       builder: (BuildContext context) {
         return AlertDialog(
           scrollable: true,
-          title: const Text('Custom OpenAI Key'),
+          title: const Text('Cמפתח OpenAI מותאם אישית'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
-                controller: _keyTextEditingController,
+                controller: _textEditingController,
                 autofocus: true,
-                decoration: const InputDecoration(hintText: 'Please input your key'),
+                decoration: const InputDecoration(hintText: 'אנא הזן את המפתח שלך'),
               ),
               const SizedBox(height: 12),
               GestureDetector(
@@ -342,16 +336,16 @@ class _SettingPageState extends State<SettingPage> with WidgetsBindingObserver {
                     ),
                   );
                   EasyLoading.showToast(
-                    'Copy successfully!',
+                    'העתק בהצלחה!',
                     dismissOnTap: true,
                   );
                   isCopying = false;
                 },
-                child: SingleChildScrollView(
+                child: const SingleChildScrollView(
                   child: Wrap(
-                    children: const [
+                    children: [
                       Text(
-                        '* Custom key can use the APP without restrictions.',
+                        '* לא מומלץ',
                         textAlign: TextAlign.start,
                         softWrap: true,
                         style: TextStyle(
@@ -362,18 +356,7 @@ class _SettingPageState extends State<SettingPage> with WidgetsBindingObserver {
                       ),
                       SizedBox(height: 6),
                       Text(
-                        '* You will get the APP version without ads.',
-                        textAlign: TextAlign.start,
-                        softWrap: true,
-                        style: TextStyle(
-                          fontSize: 14,
-                          height: 20 / 14,
-                          color: Color.fromRGBO(220, 0, 0, 1.0),
-                        ),
-                      ),
-                      SizedBox(height: 6),
-                      Text(
-                        '* The AI Chat APP does not collect this key.',
+                        '* אפליקציית CHAT AI לא אוספת מפתח זה.',
                         textAlign: TextAlign.start,
                         softWrap: true,
                         style: TextStyle(
@@ -384,7 +367,7 @@ class _SettingPageState extends State<SettingPage> with WidgetsBindingObserver {
                       ),
                       SizedBox(height: 6),
                       Text(
-                        '* The Key we provide may report an error, and custom keys need to be created at https://platform.openai.com/ .',
+                        '* המפתח שאנו מספקים עשוי לדווח על שגיאה, ויש ליצור מפתחות מותאמים אישית בכתובת https://platform.openai.com/ .',
                         textAlign: TextAlign.start,
                         softWrap: true,
                         style: TextStyle(
@@ -395,7 +378,7 @@ class _SettingPageState extends State<SettingPage> with WidgetsBindingObserver {
                       ),
                       SizedBox(height: 6),
                       Text(
-                        '* Click Copy URL.',
+                        '* לחץ על העתק כתובת אתר',
                         textAlign: TextAlign.start,
                         softWrap: true,
                         style: TextStyle(
@@ -412,94 +395,22 @@ class _SettingPageState extends State<SettingPage> with WidgetsBindingObserver {
           ),
           actions: [
             TextButton(
-              child: const Text('Cancel'),
+              child: const Text('לְבַטֵל'),
               onPressed: () {
-                _keyTextEditingController.clear();
+                _textEditingController.clear();
                 Navigator.of(context).pop(false);
               },
             ),
             TextButton(
-              child: const Text('Confirm'),
+              child: const Text('לְאַשֵׁר'),
               onPressed: () async {
-                ChatGPT.setOpenAIKey(_keyTextEditingController.text).then((_) {
-                  _keyTextEditingController.clear();
-                  Navigator.of(context).pop(true);
-                  EasyLoading.showToast(
-                    'Successful setting!',
-                    dismissOnTap: true,
-                  );
-                });
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _showCustomOpenAIUrlDialog() async {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          scrollable: true,
-          title: const Text('Custom OpenAI Base URL'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: _urlTextEditingController,
-                autofocus: true,
-                decoration: const InputDecoration(hintText: 'Please input your OpenAI host'),
-              ),
-              const SizedBox(height: 12),
-              Wrap(
-                children: const [
-                  Text(
-                    "You can set openai host where access to the official OpenAI host is restricted or unavailable, "
-                    "allowing you to configure an alternative host for the specific needs.\n"
-                    "Use https://api.openai.com by default.",
-                    textAlign: TextAlign.start,
-                    softWrap: true,
-                    style: TextStyle(
-                      fontSize: 14,
-                      height: 20 / 14,
-                      color: Colors.grey,
-                    ),
-                  ),
-                  Text(
-                    "This option is only applied when you provide a custom apiKey.",
-                    textAlign: TextAlign.start,
-                    softWrap: true,
-                    style: TextStyle(
-                      fontSize: 14,
-                      height: 20 / 14,
-                      color: Colors.red,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              child: const Text('Cancel'),
-              onPressed: () {
-                _urlTextEditingController.clear();
-                Navigator.of(context).pop(false);
-              },
-            ),
-            TextButton(
-              child: const Text('Confirm'),
-              onPressed: () async {
-                ChatGPT.setOpenAIBaseUrl(_urlTextEditingController.text).then((_) {
-                  _urlTextEditingController.clear();
-                  Navigator.of(context).pop(true);
-                  EasyLoading.showToast(
-                    'Successful setting!',
-                    dismissOnTap: true,
-                  );
-                });
+                await ChatGPT.setOpenAIKey(_textEditingController.text);
+                _textEditingController.clear();
+                Navigator.of(context).pop(true);
+                EasyLoading.showToast(
+                  'מוּצלָח!',
+                  dismissOnTap: true,
+                );
               },
             ),
           ],

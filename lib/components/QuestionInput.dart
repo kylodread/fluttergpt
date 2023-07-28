@@ -1,6 +1,10 @@
+// ignore_for_file: file_names, library_private_types_in_public_api
+
+import 'package:aichat/components/WatchAdDialog.dart';
 import 'package:aichat/utils/Chatgpt.dart';
 import 'package:flutter/material.dart';
 import 'package:aichat/stores/AIChatStore.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:provider/provider.dart';
 
 GlobalKey<_QuestionInputState> globalQuestionInputKey = GlobalKey();
@@ -112,7 +116,6 @@ class _QuestionInputState extends State<QuestionInput> {
 
       _updateGeneratingStatus(false);
     } catch (error) {
-      print(error);
       _updateGeneratingStatus(false);
       await store.replaceMessage(chat['id'], messageIndex, {
         'role': 'error',
@@ -120,7 +123,6 @@ class _QuestionInputState extends State<QuestionInput> {
       });
     }
 
-    print(messages);
   }
 
   void onSubmit() async {
@@ -129,7 +131,22 @@ class _QuestionInputState extends State<QuestionInput> {
       return;
     }
     if (_isGenerating) {
-      print('---_isGenerating---');
+      return;
+    }
+    if (!store.hasApiCount) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return WatchAdDialog(
+            onClose: () {
+              Navigator.of(context).pop();
+            },
+          );
+        },
+      );
+      EasyLoading.showToast('No more times',
+        dismissOnTap: true,
+      );
       return;
     }
 
@@ -150,6 +167,7 @@ class _QuestionInputState extends State<QuestionInput> {
     bool isFirstMessage = widget.chat['messages'].length == 0;
     debugPrint('---是否首次发消息 $isFirstMessage---');
     Map chat = await store.pushMessage(widget.chat, message);
+    await store.delApiCount(1);
 
     List messages = [
       chat['systemMessage'],
@@ -201,7 +219,6 @@ class _QuestionInputState extends State<QuestionInput> {
       });
       _updateGeneratingStatus(false);
     } catch (error) {
-      print(error);
       _updateGeneratingStatus(false);
       await store.replaceMessage(chat['id'], messageIndex, {
         'role': 'error',
@@ -252,7 +269,7 @@ class _QuestionInputState extends State<QuestionInput> {
                       minLines: 1,
                       maxLines: 2,
                       decoration: const InputDecoration.collapsed(
-                        hintText: 'Enter your message',
+                        hintText: 'הקלד הודעה...',
                       ),
                       autofocus: widget.autofocus,
                       style: const TextStyle(
@@ -298,7 +315,7 @@ class _QuestionInputState extends State<QuestionInput> {
         onSubmit();
       },
       child: Container(
-        padding: const EdgeInsets.fromLTRB(8, 8, 12, 8),
+        padding: const EdgeInsets.fromLTRB(4, 8, 12, 8),
         width: 50,
         child: Image(
           image: AssetImage('images/${isActive ? 'submit_active_icon' : 'submit_icon'}.png'),
