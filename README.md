@@ -1,3 +1,7 @@
+http://codenamekylo.co.za/
+
+developerkylo@gmail.com
+
 ## ChatGPT Application with flutter
 
 ChatGPT has released version 4.0, but it is not fully open. Currently, AI Chat uses the `gpt-3.5-turbo` model.
@@ -6,9 +10,9 @@ ChatGPT has released version 4.0, but it is not fully open. Currently, AI Chat u
 
 - Whether to configure infinite number of versions through `isInfiniteNumberVersion` in `lib/utils/Config.dart`
 
-- main branch: Unlimited version, including `chatgpt`, need to configure openaiKey.
+-// main branch: Unlimited version, including `chatgpt`, need to configure openaiKey.
 
-- admob branch: the version with the number of times you watched ads, including `firebase`, `admob`, `chatgpt`, need the corresponding ad configuration and openaiKey.
+//- admob branch: the version with the number of times you watched ads, including `firebase`, `admob`, `chatgpt`, need the corresponding ad configuration and openaiKey.
 
 At present, Android supports running on a real machine, and IOS has only been run on an emulator. IOS packaging requires a developer account.
 
@@ -61,4 +65,4 @@ signingConfigs {
          keyPassword "123456"
      }
 }
-```# fluttergpt
+```
