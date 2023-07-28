@@ -8,7 +8,6 @@ import 'package:aichat/utils/Utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
-import 'package:rating_dialog/rating_dialog.dart';
 import 'package:sp_util/sp_util.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:aichat/stores/AIChatStore.dart';
@@ -103,7 +102,7 @@ class _SettingPageState extends State<SettingPage> with WidgetsBindingObserver {
                   padding: const EdgeInsets.only(right: 35),
                   child: GestureDetector(
                    onLongPressStart: (details) {
-                      longPressTimer = Timer(Duration(seconds: 1), () {
+                      longPressTimer = Timer(const Duration(seconds: 1), () {
                         _showPopupWindow();
                       });
                     },
@@ -172,6 +171,7 @@ class _SettingPageState extends State<SettingPage> with WidgetsBindingObserver {
                     26,
                     'התאם אישית את מפתח OpenAI',
                     () async {
+                      // ignore: await_only_futures
                       String cacheKey = await ChatGPT.getCacheOpenAIKey();
                       _textEditingController.text = cacheKey;
                       _showCustomOpenAIKeyDialog();
@@ -406,6 +406,7 @@ class _SettingPageState extends State<SettingPage> with WidgetsBindingObserver {
               onPressed: () async {
                 await ChatGPT.setOpenAIKey(_textEditingController.text);
                 _textEditingController.clear();
+                // ignore: use_build_context_synchronously
                 Navigator.of(context).pop(true);
                 EasyLoading.showToast(
                   'מוּצלָח!',

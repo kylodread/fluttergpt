@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
-import './Utils.dart';
 import 'Config.dart';
 
 class RewardedInterstitialAdCreator {

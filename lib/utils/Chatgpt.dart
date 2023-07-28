@@ -1,3 +1,5 @@
+// ignore_for_file: file_names, depend_on_referenced_packages, avoid_print
+
 import 'package:dart_openai/openai.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -266,7 +268,7 @@ class ChatGPT {
       model: model,
     );
     debugPrint('---text $text---');
-    String content = chatCompletion.choices.first.message.content ?? '';
+    String content = chatCompletion.choices.first.message.content;
     bool hasRelation = content.toLowerCase().contains('true');
     debugPrint('---检查问题前后关联度 $hasRelation---');
     return hasRelation;

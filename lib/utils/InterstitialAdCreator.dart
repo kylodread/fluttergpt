@@ -1,4 +1,3 @@
-import 'package:aichat/utils/Utils.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 import 'Config.dart';

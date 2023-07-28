@@ -1,7 +1,12 @@
+// ignore: duplicate_ignore
+// ignore: duplicate_ignore
+// ignore: file_names
+// ignore: file_names
+// ignore_for_file: file_names, duplicate_ignore
+
 import 'package:aichat/utils/Chatgpt.dart';
 import 'package:aichat/utils/Config.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:uuid/uuid.dart';
 
 class AIChatStore extends ChangeNotifier {
   AIChatStore() {
@@ -169,6 +174,7 @@ chat
     chatList.add(cacheHistory);
     await ChatGPT.storage.write(chatListKey, chatList);
     notifyListeners();
+    // ignore: avoid_print
     print('---cacheHistory---$cacheHistory');
     return cacheHistory;
   }
