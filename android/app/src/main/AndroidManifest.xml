@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.kylo.chatai">
 
-    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.INTERNET" /> />
 
     <application
         android:name="${applicationName}"
@@ -9,7 +9,7 @@
         android:label="ChatAi - In Hebrew">
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="****" />
+            android:value="ca-app-pub-1411450732913265~7528190248"/>
         <activity
             android:name=".MainActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
