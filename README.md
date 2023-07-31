@@ -2,6 +2,13 @@ http://codenamekylo.co.za/
 
 developerkylo@gmail.com
 
+---------------------------------------------------
+CHANGE ENV.EXAMPLE TO ".env"
+
+change open ai api key in the ".env" file
+
+run 'flutter pub upgrade'
+
 ## ChatGPT Application with flutter
 
 ChatGPT has released version 4.0, but it is not fully open. Currently, AI Chat uses the `gpt-3.5-turbo` model.
