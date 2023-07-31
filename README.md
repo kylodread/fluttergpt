@@ -3,11 +3,32 @@ http://codenamekylo.co.za/
 developerkylo@gmail.com
 
 ---------------------------------------------------
-CHANGE ENV.EXAMPLE TO ".env"
 
-change open ai api key in the ".env" file
+INSTRUCTIONS!!!
+---------------
+change "env.example" to ".env"
 
-run 'flutter pub upgrade'
+Update the OpenAI api key in the ".env" file to YOUR new OPEN AI KEY
+
+run 'flutter pub get' in terminal.
+---------------
+SETUP!!!!
+
+Where to change:
+
+App Name: IOS: fluttergpt\ios\Runner\Info.plist                               (10,10:<string>ChatAi In Hebrew</string>)
+          Android: fluttergpt\android\app\src\main\AndroidManifest.xml        (9,24: android:label="ChatAi - In Hebrew">)
+
+App Icon: IOS: fluttergpt\ios\Runner\Assets.xcassets\AppIcon.appiconset (Replace these files)
+          Android: fluttergpt\android\app\src\main\res  (Replace these files)
+
+OPEN AI KEY: fluttergpt\.env (change from env.example to .env)
+                fluttergpt\env.example (change to .env)
+
+AD Unit ID: Android: fluttergpt\android\app\src\main\AndroidManifest.xml (12,28:android:value="ca-app-pub-1411450732913265~7528190248"/>)
+            IOS: fluttergpt\ios\Runner\Info.plist (56,10:<string>ca-app-pub-1411450732913265~7528190248</string>)
+                 fluttergpt\lib\utils\AdCommon.dart (All The Ad Units)
+
 
 ## ChatGPT Application with flutter
 
@@ -16,10 +37,6 @@ ChatGPT has released version 4.0, but it is not fully open. Currently, AI Chat u
 ### Software version
 
 - Whether to configure infinite number of versions through `isInfiniteNumberVersion` in `lib/utils/Config.dart`
-
--// main branch: Unlimited version, including `chatgpt`, need to configure openaiKey.
-
-//- admob branch: the version with the number of times you watched ads, including `firebase`, `admob`, `chatgpt`, need the corresponding ad configuration and openaiKey.
 
 At present, Android supports running on a real machine, and IOS has only been run on an emulator. IOS packaging requires a developer account.
 
@@ -48,12 +65,6 @@ At present, Android supports running on a real machine, and IOS has only been ru
 <key>GADApplicationIdentifier</key>
 <string>****</string>
 ```
-
-#### `firebase` (ads version)
-
-- Configure Android and IOS in the firebase background [https://console.firebase.google.com/](https://console.firebase.google.com/), Android needs to download `google-services.json`, IOS needs Download `GoogleService-Info.plist`
-- `google-services.json`: `android/app/google-services.json`
-- `GoogleService-Info.plist`: `ios/Runner/GoogleService-Info.plist`
 
 #### Android packaging and compilation configuration
 
