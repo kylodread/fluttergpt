@@ -25,8 +25,8 @@ App Icon: IOS: fluttergpt\ios\Runner\Assets.xcassets\AppIcon.appiconset (Replace
 OPEN AI KEY: fluttergpt\.env (change from env.example to .env)
                 fluttergpt\env.example (change to .env)
 
-AD Unit ID: Android: fluttergpt\android\app\src\main\AndroidManifest.xml (12,28:android:value="ca-app-pub-1411450732913265~7528190248"/>)
-            IOS: fluttergpt\ios\Runner\Info.plist (56,10:<string>ca-app-pub-1411450732913265~7528190248</string>)
+AD Unit ID: Android: fluttergpt\android\app\src\main\AndroidManifest.xml (12,28:android:value="ca-app-pub-000000000000~00000000"/>)
+            IOS: fluttergpt\ios\Runner\Info.plist (56,10:<string>ca-app-pub-000000000000~000000000</string>)
                  fluttergpt\lib\utils\AdCommon.dart (All The Ad Units)
 
 
